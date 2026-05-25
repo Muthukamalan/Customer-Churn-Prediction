@@ -1,6 +1,9 @@
 *xlsx
 *.csv
+logs
 outputs
+multirun
+mlruns
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -223,3 +226,10 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 /customer_churn.json
+
+
+# 
+mlflow.db
+
+#
+*.zip

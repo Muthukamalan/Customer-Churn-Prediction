@@ -1,0 +1,6 @@
+[core]
+    analytics = false
+    autostage = true
+['db "pgsql"']
+    url = postgresql://mlflow_db:mlflow_db@localhost:5432/mlchurn
+    password = mlflow_db
