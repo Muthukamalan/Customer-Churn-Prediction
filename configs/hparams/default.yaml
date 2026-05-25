@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - override /model: logistic_regression
+  - override /hydra/sweeper: optuna
+
+# Generic base hparams - no specific hyperparameters
+# Model-specific hparams override this

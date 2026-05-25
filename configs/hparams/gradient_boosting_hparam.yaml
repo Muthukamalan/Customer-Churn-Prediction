@@ -1,0 +1,27 @@
+# @package _global_
+
+defaults:
+  - override /model: gradient_boosting
+  - override /hparams: gradient_boosting_hparam
+  - override /hydra/sweeper: optuna
+  - _self_
+
+hydra:
+  mode: "MULTIRUN"
+  sweeper:
+    _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+    study_name: logistic_regression_study
+    n_jobs: 1
+    direction: maximize
+    n_trials: 20
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 1234
+      n_startup_trials: 10
+    params:
+      model.n_estimators: range(0,20,1)
+      model.max_depth: range(2, 20,5)
+      model.learning_rate: range(0.01, 1.0, 0.1)
+      model.subsample: range(0.1, 1.0, 0.1)
+      model.min_samples_split: range(2, 20, 1)
+      model.min_samples_leaf: choice(1, 2, 4)

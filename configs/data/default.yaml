@@ -1,0 +1,27 @@
+path: data/processed/churn_data.csv
+test_size: 0.2
+random_state: 42
+drop_cols:
+  - customer_id
+  - total_revenue
+  - cltv
+  - total_refunds
+  - total_extra_data_charges
+  # - city
+  - zip_code
+  # - partner
+  # - senior_citizen
+  # - under_30
+  # - total_charges
+  - total_long_distance_charges
+  # - tech_support
+  # - device_protection
+  # - population
+  # - monthly_charges
+  # - churn_category
+  # - customer_status
+  # - churn_score
+  # - churn_reason
+  # - churn_value
+target_col: churn_label
+

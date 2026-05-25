@@ -1,0 +1,8 @@
+defaults:
+  - data: default
+  - mlflow: default
+  - model: random_forest
+
+main:
+  experiment_name: "mlchurn-classification"
+
