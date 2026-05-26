@@ -11,8 +11,8 @@ dvc-ready:
 
 compose-local-down:
 	@docker compose -f compose.local.yaml down
+	@docker volume rm mlchurn_minio_data mlchurn_postgres_data mlchurn_grafana_data
 
 
 clean:
-	@find . -type d \( -name "__pycache__"  -o -name ".ruff_cache" \) -print
 	@find . -type d \( -name "__pycache__" -o -name "outputs" -o -name ".ruff_cache" -o -name "multirun"  -o -name "logs" -o -name "logs" -o -name "mlruns" \) -exec rm -rf {} +
