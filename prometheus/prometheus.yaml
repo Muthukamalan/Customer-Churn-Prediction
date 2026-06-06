@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 1s
+  evaluation_interval: 1s
+  extra_scrape_metrics: true  
+
+
+runtime:
+  gogc: 100
+
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - "prometheus:9090"  # ✅ added quotes for consistency
+
+  # PostgreSQL Exporter
+  - job_name: "postgresl_exporter"
+    extra_scrape_metrics: true
+    static_configs:
+      - targets:
+          - "postgresl_exporter:9187"
+
+  # Minio Exporter
+  - job_name: "minio"
+    metrics_path: "/minio/v2/metrics/cluster"
+    enable_compression: true
+    metric_name_validation_scheme: utf8
+    static_configs:
+      - targets:
+          - "minio:9000"

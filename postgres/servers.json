@@ -1,0 +1,24 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "mlflow_name",
+      "Group": "mlflow",
+      "Host": "mlflow_db",
+      "Port": 5432,
+      "MaintenanceDB": "mlflow_db",
+      "Username": "mlflow_db",
+      "Password": "mlflow_db",
+      "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "mlflow_name",
+      "Group": "raw-data",
+      "Host": "mlflow_db",
+      "Port": 5432,
+      "MaintenanceDB": "mlchurn",
+      "Username": "mlflow_db",
+      "Password": "mlflow_db",
+      "SSLMode": "prefer"
+    }
+  }
+}
