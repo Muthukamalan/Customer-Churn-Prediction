@@ -1,5 +1,7 @@
 services:
-
+  # ────────────────────────────────────────────────────────────
+  #  S3  —  Minio acts Object storage with S3 API Compatability
+  # ────────────────────────────────────────────────────────────
   s3:
     image: minio/minio
     container_name: minio 
@@ -26,7 +28,7 @@ services:
 
  
   # ────────────────────────────────────────────────────────────
-  #  MinIO Init  —  creates the bucket once on first start
+  #  MinIO Init  —  creates the bucket once on first start 
   # ────────────────────────────────────────────────────────────
   minio_init:
     image: minio/mc:latest
@@ -44,10 +46,12 @@ services:
         mc ls local/${BUCKET_NAME} &&
         echo 'Bucket ${BUCKET_NAME} ready.'
       "
-    # mc anonymous set download local/mlflow-artifacts &&
+    # mc anonymous set download local/mlflow-artifacts to get publcly accessed
     restart: on-failure
         
-
+  # ────────────────────────────────────────────────────────────
+  #  DB —  Mlflow DB backed by Postgres to store Metadata
+  # ────────────────────────────────────────────────────────────
   db:
     image: postgres:17.5-alpine
     ports:
@@ -57,6 +61,7 @@ services:
       POSTGRES_DB: mlflow_db
       POSTGRES_USER: mlflow_db
       POSTGRES_PASSWORD: mlflow_db
+      TZ: Asia/Kolkata
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/customer_churn.csv:/docker-entrypoint-initdb.d/customer_churn.csv
@@ -69,6 +74,29 @@ services:
       retries: 5
 
 
+  # ─────────────────────────────────────────────────────────────────────────
+  #  Postgresql Exporter -  Exposes Postgres Metrics for Prometheus to scrape
+  # ─────────────────────────────────────────────────────────────────────────
+  postgresql_exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgresl_exporter
+    ports:
+      - "9187:9187"
+    environment:
+      # - DATA_SOURCE_NAME="postgres://${{DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?sslmode=disable}"
+      DATA_SOURCE_NAME: "postgresql://mlflow_db:mlflow_db@db:5432/mlflow_db?sslmode=disable"
+    depends_on:
+      db:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    restart: always
+
+
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Tracking Server —  Mlflow helps to communicate Metadata & Artifacts
+  # ─────────────────────────────────────────────────────────────────────
   tracking_server:
     image: ghcr.io/mlflow/mlflow:v2.12.1
     container_name: mlflow_server
@@ -98,7 +126,10 @@ services:
       timeout: 10s
       retries: 3
     
-  
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Pgadmin: UI for the Postgres DB and MLflow MetaData
+  # ─────────────────────────────────────────────────────────────────────
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_ui
@@ -107,20 +138,34 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - MASTER_PASSWORD_REQUIRED=False
+    volumes:
+      - ./postgres/servers.json:/pgadmin4/servers.json
     depends_on:
       - db
     restart: always 
 
-
+  # ─────────────────────────────────────────────────────────────────────
+  #  Prometheus:
+  # ─────────────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus
     container_name: prometheus
     ports:
       - "9090:9090"
     restart: always
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.listen-address=:9090"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.templates=/etc/prometheus/consoles"
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
 
+  # ─────────────────────────────────────────────────────────────────────
+  #  Grafana:
+  # ─────────────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:main-slim
     container_name: grafana
@@ -138,3 +183,12 @@ volumes:
   minio_data:
   postgres_data:
   grafana_data:
+
+
+# networks:
+#   example_network:
+#   driver: bridge
+#   ipam:
+#     driver: default
+#     config:
+#       - subnet: 172.16.238.0/24
