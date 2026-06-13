@@ -10,7 +10,8 @@ import rootutils
 import warnings
 import logging
 import matplotlib
-matplotlib.use('Agg')  # Forces a headless, thread-safe backend 
+
+matplotlib.use("Agg")  # Forces a headless, thread-safe backend
 # "RuntimeError: main thread is not in main loop" when training multiple sklearn classifiers
 
 from hydra.utils import instantiate
@@ -75,6 +76,7 @@ class EstimatorClassifier(BaseEstimator, ClassifierMixin):
 # os.environ["AWS_SECRET_ACCESS_KEY"] = "minio"
 # os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://localhost:9000"
 
+
 @hydra.main(config_path=os.path.join(root, "configs"), config_name="hparams", version_base=None)
 def main(cfg: DictConfig):
     """
@@ -98,12 +100,17 @@ def main(cfg: DictConfig):
         logger.info(f"Experiment '{cfg.mlflow.experiment_name}' already exists with ID: {experiment.experiment_id}")
         mlflow.set_experiment(cfg.mlflow.experiment_name)
 
-    mlflow.sklearn.autolog(log_datasets=False,log_input_examples=False,extra_tags={"model": model_name},log_models=False,silent=True,serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE)
+    mlflow.sklearn.autolog(
+        log_datasets=False,
+        log_input_examples=False,
+        extra_tags={"model": model_name},
+        log_models=False,
+        silent=True,
+        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+    )
 
     model = instantiate(cfg.model)
     print(f"Instantiated model: {model.__class__.__name__}")
-
-    
 
     data_path = os.path.join(root, cfg.data.path)
     logger.info(f"\nLoading data from: {data_path}")
@@ -184,11 +191,10 @@ def main(cfg: DictConfig):
             print(f"{mlflow.get_artifact_uri()=}")
             print(f"{mlflow.get_tracking_uri()=}")
 
-            mlflow.set_tag(key='model_name',value=model_name)
-            for key, value in cfg.model.items(): 
+            mlflow.set_tag(key="model_name", value=model_name)
+            for key, value in cfg.model.items():
                 mlflow.set_tag(f"{model_name}.{key}", str(value))
 
-            
             pipe.fit(X_train, y_train)
 
             y_pred = pipe.predict(X_test)
@@ -254,7 +260,7 @@ def main(cfg: DictConfig):
             if os.path.exists(report_path):
                 os.remove(report_path)
     except Exception as e:
-        logger.critical("Issue in the Train Flow:: " + str(e),exc_info= True)
+        logger.critical("Issue in the Train Flow:: " + str(e), exc_info=True)
     finally:
         mlflow.end_run()
 

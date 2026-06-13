@@ -63,7 +63,6 @@ os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
 artifact_destination = os.getenv("MLFLOW_ARTIFACTS_DESTINATION")
 
 
-
 @hydra.main(config_path=os.path.join(root, "configs"), config_name="train", version_base=None)
 def main(cfg: DictConfig):
     print("=" * 70)
@@ -82,10 +81,14 @@ def main(cfg: DictConfig):
         logger.info(f"Experiment '{cfg.mlflow.experiment_name}' already exists with ID: {experiment.experiment_id}")
         mlflow.set_experiment(cfg.mlflow.experiment_name)
 
-    
-    
-
-    mlflow.sklearn.autolog(log_datasets=False,log_input_examples=False,extra_tags={"model": model_name},log_models=False,silent=True,serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE)
+    mlflow.sklearn.autolog(
+        log_datasets=False,
+        log_input_examples=False,
+        extra_tags={"model": model_name},
+        log_models=False,
+        silent=True,
+        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+    )
 
     data_path = os.path.join(root, cfg.data.path)
     logger.info(f"\nLoading data from: {data_path}")
@@ -161,8 +164,6 @@ def main(cfg: DictConfig):
 
     pipe = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
 
-
-    
     try:
         with mlflow.start_run(run_name=cfg.mlflow.run_name, log_system_metrics=True, nested=False):
             print(f"{mlflow.get_artifact_uri()=}")
@@ -234,7 +235,7 @@ def main(cfg: DictConfig):
                 os.remove(report_path)
 
     except Exception as e:
-        logger.critical("Issue in the Train Flow:: " + str(e),exc_info=True)
+        logger.critical("Issue in the Train Flow:: " + str(e), exc_info=True)
 
     finally:
         mlflow.end_run()
