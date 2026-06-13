@@ -2,7 +2,7 @@
 
 defaults:
   - override /model: logistic_regression
-  - override /hparams: logistic_regression
+  - override /hparams: logistic_hparam
   - override /hydra/sweeper: optuna
   - _self_
 

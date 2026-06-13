@@ -3,7 +3,7 @@
 defaults:
   - data: default
   - model: default
-  - hparams: default
+  - hparams: ??
   - _self_
 
 
