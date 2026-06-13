@@ -1,0 +1,129 @@
+# ==============================================================================
+# Ruff Configuration
+# Docs: https://docs.astral.sh/ruff/
+# ==============================================================================
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+
+# Target Python version
+target-version = "py312"
+
+# Max line length (Black-compatible default)
+line-length = 180
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "C90",
+    "I",
+    "N",
+    "D",
+    "UP",
+    "YTT",
+    "ANN",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "ISC",
+    "ICN",
+    "INP",
+    "PIE",
+    "PT",
+    "RET",
+    "SIM",
+    "TID",
+    "ARG",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "RUF",
+]
+ignore = [
+    "D105",
+    "D107",
+    "D203",
+    "D212",
+    "UP006",
+    "UP007",
+    "D400",
+    "D406",
+    "D407",
+    "PLC1901",
+    "UP035",
+    "COM812",
+]
+unfixable = ["F401", "F841"]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",   # Allow assert statements in tests
+    "ARG",    # Unused arguments common in fixtures
+    "FBT",    # Boolean args common in test parametrize
+    "PT",     # Relax pytest style in test files
+]
+"scripts/**/*.py" = [
+    "T201",   # Allow print() in scripts
+    "INP001", # Scripts don't need __init__.py
+]
+"__init__.py" = [
+    "F401",   # Allow unused imports in __init__.py (re-exports)
+]
+"conf/**/*.py" = [
+    "F401",   # Hydra config files often import for side effects
+]
+"notebooks/**/*.py" = [
+    "T201",   # Allow print in notebooks
+    "E402",   # Module level import not at top
+    "F401",   # Allow unused imports in notebooks
+]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
