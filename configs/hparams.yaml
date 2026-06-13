@@ -5,3 +5,7 @@ defaults:
   - model: default
   - hparams: default
   - _self_
+
+
+mlflow:
+  experiment_name: hparam-runs

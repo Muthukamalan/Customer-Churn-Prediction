@@ -1,12 +1,11 @@
+# @package _global_
+
 defaults:
   - data: default
-  - mlflow: default
   - model: random_forest
   - paths: default
   - hydra: default
-
-main:
-  experiment_name: "mlchurn_classification"
+  - _self_
 
 
 # task name, determines output directory path
@@ -16,3 +15,7 @@ task_name: "train"
 # you can overwrite this in experiment configs
 # overwrite from command line with `python train.py tags="[first_tag, second_tag]"`
 tags: ["dev"]
+
+mlflow:
+  experiment_name: churn-classification
+  run_name: ??
