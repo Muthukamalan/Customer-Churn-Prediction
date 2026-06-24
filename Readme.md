@@ -18,18 +18,17 @@
 
 [![DevContainer](https://img.shields.io/badge/Dev_Container-2496ED?logo=docker&logoColor=white)](https://containers.dev/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Makefile](https://img.shields.io/badge/Makefile-6D00CC?logo=gnu&logoColor=white)](https://www.gnu.org/software/make/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+
 [![DVC](https://img.shields.io/badge/DVC-945DD6?logo=dvc&logoColor=white)](https://dvc.org/)
 [![Postgresql](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![S3](https://img.shields.io/badge/Amazon_S3-569A31?logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
+
 [![prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
 [![grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 
+[![Makefile](https://img.shields.io/badge/Makefile-6D00CC?logo=gnu&logoColor=white)](https://www.gnu.org/software/make/)
 
-
-tags: #MachineLearning #Classification #Supervised #MLOps
-tech: #python #numpy #pandas #scikit-learn #matplotlib #hydra #mlflow #postgresql #grafana #prometheus #Makefile #Linux #Docker #Docker-Compose #ruff #mypy #onnx #minio #s3 #pre-commit #fastapi
 
 ![Churn Prediction](./assets/CustomerChurn.png)
 
@@ -50,14 +49,94 @@ tech: #python #numpy #pandas #scikit-learn #matplotlib #hydra #mlflow #postgresq
     ├── Telco_customer_churn_status.xlsx
     └── Telco_customer_churn.xlsx
 ```
+2. run `scripts/prep_db_ingestion.py` file. it'll prepares data and keeps is it in `mlchurn/data/processed/...` folder. postgresql pick this file and uploads into the "**mlchurn**" database and "**customer_churn**" table 
 
-## Sample Script
-### Debug
+
+## Data Setup 
+This project has designed to run everything on Docker.  But the requirement you need to install so, given from your input.
 ```sh
-HYDRA_FULL_ERROR=1 python src/train/train.py mlflow.run_name=logistic_best_hparams
+dvc init
+dvc config core.autostage true
+dvc config core.analytics false
+
+# [dvc-doc](https://doc.dvc.org/command-reference/import-db#database-connections)
+# dvc config db.pgsql.url postgresql://user@hostname:port/database
+# dvc config --local db.pgsql.password password
+
+dvc config db.pgsql.url "postgresql://mlflow_db:mlflow_db@localhost:5432/mlchurn"
+dvc config --local db.pgsql.password mlflow_db
+
+# [dvc-doc](https://doc.dvc.org/command-reference/import-db#installing-database-drivers)
+# dvc import-db --table customers_table --conn pgsql
+
+dvc import-db --table "customer_churn" --conn pgsql # import from table to CSV (local) md5 hash
 ```
 
-### Hyperparameter Search
+## Components Setup
 ```sh
-HYDRA_FULL_ERROR=1 python src/hparams/hparams.py  -m hparams=random_forest_hparam
+docker compose -f compose.local.yaml up -d # To setup all the container 
 ```
+<div style="background-color: #f0fdf4; border-left: 5px solid #16a34a; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-family: sans-serif; color: #166534;">
+<strong>💡 Tip:</strong> Service Discovery are all in build in the docker compose
+</div>
+
+  
+
+![componets](/assets/containers_list.png)
+
+### Hyersearch the Model  (Example: Decision Tree)
+1. Decide which search space under `configs/hparams/decision_tree_hparam.yaml`
+```yaml
+params:
+    model.max_depth: range(2, 20,5)
+    model.min_samples_split: range(0,20,1)
+    model.min_samples_leaf: choice(1, 2, 4)
+```
+
+2. Pass into the Shell 
+```sh
+HYDRA_FULL_ERROR=1 python src/hparams/hparams.py  -m hparams=decision_tree_hparam
+# HYDRA_FULL_ERROR=1  to show full error the stdout
+# -m indicate the --MULTIRUN
+```
+
+3. Optuna Under the hood.
+```md
+change no. of trails `n_trials: 20`
+drection `direction: maxmize`
+no of concurrent jobs `n_jobs: 1`
+```
+
+<!-- IMPORTANT CALLOUT (Purple) -->
+<div style="background-color: #faf5ff; border-left: 5px solid #9333ea; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-family: sans-serif; color: #6b21a8;">
+    <strong>✨ Important:</strong> Issues while facing multirun <br>
+    - matplotlib.use("Agg")  # Forces a headless, thread-safe backend <br>
+    - optimizing for <b>F1 Score</b>
+</div>
+
+
+![Hparam Search](./assets/hparams_search.png)
+
+> [!IMPORTANT] Currently Supported Models
+> 1. Logistic Regression
+> 2. Decision Tree
+> 3. Gradient Boosting Algorithms
+> 4. Kneighbors 
+> 5. Random Forest
+
+
+
+### Run Model
+```sh
+HYDRA_FULL_ERROR=1 python src/train/train.py mlflow.run_name=rf_best_model model=random_forest
+```
+
+![Model Path](./assets/run_model.png)
+
+
+**Each Model will be stored in the Minio Container**
+![Artifact Path](./assets/minio_artifact_path.png)
+
+
+### Todo 
+- [ ] Support All the Scikit Learn Model on the Classification Task
