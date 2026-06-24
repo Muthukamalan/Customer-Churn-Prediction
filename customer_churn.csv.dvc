@@ -1,0 +1,12 @@
+md5: e4b5a0dd46cc276800324679b3dc7659
+frozen: true
+deps:
+- db:
+    connection: pgsql
+    file_format: csv
+    table: customer_churn
+outs:
+- md5: 1ae4fae59fe4b06cbbb0769c8d113113
+  size: 1807828
+  hash: md5
+  path: customer_churn.csv
