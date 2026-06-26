@@ -102,6 +102,7 @@ services:
     container_name: mlflow_server
     ports:
       - "5000:5000"
+      - "9100:9100"
     restart: always 
     depends_on:
       db:
@@ -118,8 +119,16 @@ services:
       - MLFLOW_S3_ENDPOINT_URL=${MLFLOW_S3_ENDPOINT_COMPATIBLE}
       - MLFLOW_S3_IGNORE_TLS=${MLFLOW_S3_IGNORE_TLS}
       - MLFLOW_ARTIFACTS_DESTINATION=${MLFLOW_ARTIFACTS_DESTINATION}
-    command: >
-      sh -c "pip install --upgrade mlflow psycopg2-binary boto3 &&  mlflow server --backend-store-uri postgresql://mlflow_db:mlflow_db@db:5432/mlflow_db --host 0.0.0.0 --port 5000 --serve-artifacts --artifacts-destination ${MLFLOW_ARTIFACTS_DESTINATION}"
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        apt-get update && apt-get install -y wget 
+        wget -q https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz &&  tar -xzf node_exporter-1.8.2.linux-amd64.tar.gz && ./node_exporter-1.8.2.linux-amd64/node_exporter & 
+        pip install --upgrade mlflow psycopg2-binary boto3
+        mlflow server --backend-store-uri postgresql://mlflow_db:mlflow_db@db:5432/mlflow_db --host 0.0.0.0 --port 5000 --serve-artifacts --artifacts-destination $${MLFLOW_ARTIFACTS_DESTINATION} 
+        
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
