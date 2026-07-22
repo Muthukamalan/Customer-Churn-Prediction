@@ -1,5 +1,6 @@
 # Telecommunication Churn Prediction
 
+Blog Post: [churn-pred](https://muthukamalan.github.io/projects/mlops-churn-prediction/)
 
 [![python](https://img.shields.io/badge/-Python_3.11_%7C_3.12_%7C_3.13-blue?logo=python&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![conda](https://img.shields.io/badge/Conda-44A833?logo=anaconda&logoColor=white)](https://docs.conda.io/)<br>
@@ -35,6 +36,9 @@
 
 ## DATA
 [Telecommunication](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FDAT00148&id=i9710CF25EF75468D95FFFC7D57D45204&objRef=i9710CF25EF75468D95FFFC7D57D45204&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22i9710CF25EF75468D95FFFC7D57D45204%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22DAT00148%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) taken as part of this exercise
+
+
+The primary objective is to show how modern MLOps tools work together to create a reproducible, scalable, and maintainable machine learning pipeline using all local setup.
 
 1. Extract the zip and place it under mlchurn/data/raw/...
 ```sh
@@ -140,3 +144,5 @@ HYDRA_FULL_ERROR=1 python src/train/train.py mlflow.run_name=rf_best_model model
 
 ### Todo 
 - [ ] Support All the Scikit Learn Model on the Classification Task
+- [ ] Inference
+- [ ] Add prometheus and Grafana Charts
