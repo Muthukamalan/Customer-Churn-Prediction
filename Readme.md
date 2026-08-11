@@ -142,6 +142,54 @@ HYDRA_FULL_ERROR=1 python src/train/train.py mlflow.run_name=rf_best_model model
 ![Artifact Path](./assets/minio_artifact_path.png)
 
 
+### Inference
+```sh
+MLFLOW_S3_ENDPOINT_URL=http://localhost:9000 AWS_ACCESS_KEY_ID=minio AWS_SECRET_ACCESS_KEY=minio123 mlflow models serve -m s3://BUCKET-NAME/models/MODELID/artifacts --env-manager local -p 
+open http://localhost:5001/docs
+```
+
+```sh
+curl -v http://localhost:5001/health
+* Host localhost:5001 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+*   Trying [::1]:5001...
+* connect to ::1 port 5001 from ::1 port 48692 failed: Connection refused
+*   Trying 127.0.0.1:5001...
+* Connected to localhost (127.0.0.1) port 5001
+> GET /health HTTP/1.1
+> Host: localhost:5001
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< date: Tue, 11 Aug 2026 19:27:10 GMT
+< server: uvicorn
+< content-length: 1
+< content-type: application/json
+
+###
+$ curl -i http://localhost:5001/ping
+HTTP/1.1 200 OK
+date: Tue, 11 Aug 2026 19:29:42 GMT
+server: uvicorn
+content-length: 1
+content-type: application/json
+```
+
+```
+data = {
+    "dataframe_split": {
+        "columns": [ "day_number", "calories", "carbohydrates","protein", "fat", "sugar", "fiber", "sodium"],
+        "data": [  [1, 2500, 300, 150, 80, 50, 25, 2000] ]
+    }
+}
+```
+
+```sh
+ss -tupln | grep 5001
+```
+
 ### Todo 
 - [ ] Support All the Scikit Learn Model on the Classification Task
 - [ ] Inference
