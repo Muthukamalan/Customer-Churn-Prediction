@@ -165,8 +165,8 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
       - PGADMIN_CONFIG_SERVER_MODE=False
       - MASTER_PASSWORD_REQUIRED=False
-    volumes:
-      - ./postgres/servers.json:/pgadmin4/servers.json
+    # volumes:
+    #   - ./postgres/servers.json:/pgadmin4/servers.json
     depends_on:
       - db
     restart: always
@@ -223,3 +223,4 @@ volumes:
   minio_data:
   postgres_data:
   grafana_data:
+  prometheus_data: 
