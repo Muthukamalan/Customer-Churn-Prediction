@@ -32,8 +32,14 @@ scrape_configs:
           - "minio:9000"
 
 
-  - job_name: "mlflow"
+  - job_name: "mlflow_container"
     extra_scrape_metrics: true
     static_configs:
       - targets:
           - "mlflow_server:9100"
+
+  - job_name: "mlflow"
+    static_configs:
+      - targets:
+          - "mlflow_server:5000"
+    extra_scrape_metrics: true
