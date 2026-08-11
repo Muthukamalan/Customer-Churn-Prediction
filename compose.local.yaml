@@ -24,6 +24,11 @@ services:
       interval: 10s
       timeout: 10s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
 
 
  
@@ -48,6 +53,7 @@ services:
       "
     # mc anonymous set download local/mlflow-artifacts to get publcly accessed
     restart: on-failure
+
         
   # ────────────────────────────────────────────────────────────
   #  DB —  Mlflow DB backed by Postgres to store Metadata
@@ -72,6 +78,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
 
 
   # ─────────────────────────────────────────────────────────────────────────
@@ -91,6 +102,11 @@ services:
       prometheus:
         condition: service_started
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 206M
 
 
 
@@ -98,7 +114,7 @@ services:
   #  Tracking Server —  Mlflow helps to communicate Metadata & Artifacts
   # ─────────────────────────────────────────────────────────────────────
   tracking_server:
-    image: ghcr.io/mlflow/mlflow:v2.12.1
+    image: ghcr.io/mlflow/mlflow:v3.5.1
     container_name: mlflow_server
     ports:
       - "5000:5000"
@@ -125,8 +141,8 @@ services:
       - |
         apt-get update && apt-get install -y wget 
         wget -q https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz &&  tar -xzf node_exporter-1.8.2.linux-amd64.tar.gz && ./node_exporter-1.8.2.linux-amd64/node_exporter & 
-        pip install --upgrade mlflow psycopg2-binary boto3
-        mlflow server --backend-store-uri postgresql://mlflow_db:mlflow_db@db:5432/mlflow_db --host 0.0.0.0 --port 5000 --serve-artifacts --artifacts-destination $${MLFLOW_ARTIFACTS_DESTINATION} 
+        pip install --upgrade psycopg2-binary boto3 prometheus_flask_exporter
+        mlflow server --backend-store-uri postgresql://mlflow_db:mlflow_db@db:5432/mlflow_db --host 0.0.0.0 --port 5000 --serve-artifacts --artifacts-destination $${MLFLOW_ARTIFACTS_DESTINATION}  --allowed-hosts '*' --expose-prometheus ./metrics
         
 
     healthcheck:
@@ -153,7 +169,12 @@ services:
       - ./postgres/servers.json:/pgadmin4/servers.json
     depends_on:
       - db
-    restart: always 
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
 
   # ─────────────────────────────────────────────────────────────────────
   #  Prometheus:
@@ -171,12 +192,17 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 100M
 
   # ─────────────────────────────────────────────────────────────────────
   #  Grafana:
   # ─────────────────────────────────────────────────────────────────────
   grafana:
-    image: grafana/grafana:main-slim
+    image: grafana/grafana:10.4.19
     container_name: grafana
     ports:
       - "3000:3000"
@@ -186,6 +212,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
 
   
 volumes:

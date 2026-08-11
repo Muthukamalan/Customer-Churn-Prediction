@@ -1,4 +1,4 @@
-md5: e4b5a0dd46cc276800324679b3dc7659
+md5: dc31e003901bc488bc58290d5f492ce2
 frozen: true
 deps:
 - db:
@@ -6,7 +6,7 @@ deps:
     file_format: csv
     table: customer_churn
 outs:
-- md5: 1ae4fae59fe4b06cbbb0769c8d113113
-  size: 1807828
+- md5: e1340c5dda20333ea1307cded965de52
+  size: 1807825
   hash: md5
   path: customer_churn.csv
